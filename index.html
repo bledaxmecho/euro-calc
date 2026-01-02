@@ -48,7 +48,7 @@
       <div class="grid">
         <div>
           <label for="priceEur">Сума на сметката (в евро)</label>
-          <input id="priceEur" type="number" inputmode="decimal" step="0.01" min="0" placeholder="напр. 12.30" />
+          <input id="priceEur" type="text" inputmode="decimal" placeholder="напр. 12,30 или 12.30" />
         </div>
 
         <div>
@@ -61,12 +61,12 @@
 
         <div>
           <label for="paidEur">Платено в евро (€)</label>
-          <input id="paidEur" type="number" inputmode="decimal" step="0.01" min="0" placeholder="напр. 10.00" />
+          <input id="paidEur" type="text" inputmode="decimal" placeholder="напр. 10,00 или 10.00" />
         </div>
 
         <div>
           <label for="paidBgn">Платено в лев (лв)</label>
-          <input id="paidBgn" type="number" inputmode="decimal" step="0.01" min="0" placeholder="напр. 20.00" />
+          <input id="paidBgn" type="text" inputmode="decimal" placeholder="напр. 20,00 или 20.00" />
         </div>
       </div>
 
@@ -86,7 +86,7 @@
       </div>
 
       <div class="tiny">
-       Въвеждаш сумата в € и какво ти дава (€ и/или лв), натискаш „Изчисли“ и показваш екрана.
+        Може да пишете <b>12,30</b> или <b>12.30</b>. Калкулаторът приема и двете.
       </div>
     </div>
   </div>
@@ -95,10 +95,57 @@
   const RATE = 1.95583; // 1 EUR = 1.95583 BGN
   const $ = (id) => document.getElementById(id);
 
-  function num(v){
-    const x = Number(v);
-    return Number.isFinite(x) ? x : 0;
+  // Accepts: "12,30", "12.30", " 1 234,56 ", "1.234,56" (BG style), "1,234.56" (EN style)
+  // Strategy:
+  //  - keep digits, '.' and ',' only
+  //  - if both separators appear, last one is decimal separator, the others are thousands separators
+  //  - if only one appears, treat it as decimal separator
+  function parseMoney(raw){
+    if (raw == null) return 0;
+    let s = String(raw).trim();
+    if (!s) return 0;
+
+    // remove spaces and non-breaking spaces
+    s = s.replace(/\s|\u00A0/g, "");
+
+    // keep only digits, dot, comma, minus
+    s = s.replace(/[^\d,.\-]/g, "");
+    if (!s || s === "-" ) return 0;
+
+    const lastComma = s.lastIndexOf(",");
+    const lastDot = s.lastIndexOf(".");
+
+    // If both exist, last separator is decimal separator.
+    if (lastComma !== -1 && lastDot !== -1){
+      const decPos = Math.max(lastComma, lastDot);
+      const decChar = s[decPos];
+
+      // remove all separators first
+      let digits = s.replace(/[.,]/g, "");
+      // insert decimal point before the last N digits that were after the decimal separator
+      const decimalsCount = s.length - decPos - 1;
+
+      if (decimalsCount > 0){
+        const intPart = digits.slice(0, digits.length - decimalsCount) || "0";
+        const fracPart = digits.slice(digits.length - decimalsCount);
+        s = intPart + "." + fracPart;
+      } else {
+        s = digits; // no decimals
+      }
+    } else if (lastComma !== -1){
+      // only comma -> decimal
+      s = s.replace(/\./g, ""); // dots as thousands
+      s = s.replace(",", ".");
+    } else if (lastDot !== -1){
+      // only dot -> decimal
+      s = s.replace(/,/g, ""); // commas as thousands
+      // keep dot
+    }
+
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
   }
+
   function round2(x){
     return Math.round((x + Number.EPSILON) * 100) / 100;
   }
@@ -112,9 +159,9 @@
   function calc(){
     const showBoth = $("showBoth").value === "yes";
 
-    const priceEur = num($("priceEur").value);
-    const paidEur  = num($("paidEur").value);
-    const paidBgn  = num($("paidBgn").value);
+    const priceEur = parseMoney($("priceEur").value);
+    const paidEur  = parseMoney($("paidEur").value);
+    const paidBgn  = parseMoney($("paidBgn").value);
 
     $("msg").innerHTML = "";
     $("out").style.display = "none";
@@ -125,13 +172,9 @@
       return;
     }
 
-    // total paid in EUR (mixed payment allowed)
     const totalPaidEur = paidEur + bgnToEur(paidBgn);
-
-    // difference in EUR
     const diffEur = totalPaidEur - priceEur;
 
-    // messages
     if (diffEur < -1e-9){
       const shortEur = round2(-diffEur);
       const shortBgn = round2(eurToBgn(shortEur));
@@ -140,10 +183,8 @@
       $("msg").innerHTML = `<div class="ok">Плащането е достатъчно.</div>`;
     }
 
-    // change in EUR (only if positive), round at the end
     const changeEur = round2(Math.max(diffEur, 0));
 
-    // output
     $("oPrice").textContent = fmt(round2(priceEur), "EUR");
     $("oPaid").textContent  = fmt(round2(totalPaidEur), "EUR");
     $("oChange").textContent = fmt(changeEur, "EUR");
