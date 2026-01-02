@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Калкулатор € / лв – сметка в евро, плащане в евро и/или лев</title>
+  <title>Калкулатор € / лв /title>
+
   <style>
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { margin:0; background:#f6f7fb; color:#111; }
@@ -13,214 +14,213 @@
     .rate { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin: 8px 0 16px; }
     .rate code { background:#f1f2f7; padding:6px 10px; border-radius:10px; }
     .pill { display:inline-block; padding:3px 8px; border-radius:999px; background:#0b1020; color:#fff; font-size:12px; }
+
     .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 720px){ .grid{ grid-template-columns:1fr; } }
+
     label { display:block; font-size:12px; opacity:.85; margin:0 0 6px; }
+
     input, select, button {
-      width:100%; padding:12px; border-radius:12px; border:1px solid #d6d8e3;
-      font-size:14px; background:#fff; box-sizing:border-box;
+      width:100%; padding:12px; border-radius:12px;
+      border:1px solid #d6d8e3; font-size:14px; background:#fff;
+      box-sizing:border-box;
     }
     input:focus, select:focus { outline:2px solid #cfd6ff; border-color:#95a3ff; }
+
     .actions { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
     button { cursor:pointer; border:0; }
     .btn-primary { background:#2f57ff; color:#fff; }
     .btn-secondary { background:#eef0ff; color:#1c2b8a; }
+
     .out { margin-top:14px; padding:14px; border-radius:14px; background:#0b1020; color:#fff; display:none; }
     .out h2 { margin:0 0 8px; font-size:16px; }
-    .row { display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.12); }
+
+    .row {
+      display:flex; justify-content:space-between; gap:10px;
+      padding:6px 0; border-bottom:1px solid rgba(255,255,255,.12);
+    }
     .row:last-child { border-bottom:0; }
-    .warn { margin-top:10px; padding:10px 12px; border-radius:12px; background:#fff3cd; border:1px solid #ffe08a; color:#5a4600; }
-    .ok { margin-top:10px; padding:10px 12px; border-radius:12px; background:#d1e7dd; border:1px solid #a3cfbb; color:#0a3d2a; }
+
+    .warn {
+      margin-top:10px; padding:10px 12px; border-radius:12px;
+      background:#fff3cd; border:1px solid #ffe08a; color:#5a4600;
+    }
+    .ok {
+      margin-top:10px; padding:10px 12px; border-radius:12px;
+      background:#d1e7dd; border:1px solid #a3cfbb; color:#0a3d2a;
+    }
     .tiny { font-size:12px; opacity:.85; margin-top:10px; line-height:1.35; }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Сметка в евро (€) · Плащане в евро и/или лев · Ресто</h1>
+<div class="wrap">
+  <div class="card">
+    <h1>Плащане в евро и/или лев</h1>
 
-      <div class="rate">
-        <span class="pill">Курс</span>
-        <code>1 € = 1.95583 лв</code>
-        <span class="pill">Закръгляне: 2 знака</span>
+    <div class="rate">
+      <span class="pill">Курс</span>
+      <code>1 € = 1.95583 лв</code>
+      <span class="pill">2 знака</span>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label for="priceEur">Сума на сметката (в €)</label>
+        <input id="priceEur" type="text" placeholder="напр. 12,30 или 12.30">
       </div>
 
-      <div class="grid">
-        <div>
-          <label for="priceEur">Сума на сметката (в евро)</label>
-          <input id="priceEur" type="text" inputmode="decimal" placeholder="напр. 12,30 или 12.30" />
-        </div>
-
-        <div>
-          <label for="showBoth">Покажи еквиваленти в лв</label>
-          <select id="showBoth">
-            <option value="yes" selected>Да</option>
-            <option value="no">Не</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="paidEur">Платено в евро (€)</label>
-          <input id="paidEur" type="text" inputmode="decimal" placeholder="напр. 10,00 или 10.00" />
-        </div>
-
-        <div>
-          <label for="paidBgn">Платено в лев (лв)</label>
-          <input id="paidBgn" type="text" inputmode="decimal" placeholder="напр. 20,00 или 20.00" />
-        </div>
+      <div>
+        <label for="showBoth">Покажи еквивалент в лв</label>
+        <select id="showBoth">
+          <option value="yes" selected>Да</option>
+          <option value="no">Не</option>
+        </select>
       </div>
 
-      <div class="actions">
-        <button class="btn-primary" id="calcBtn">Изчисли</button>
-        <button class="btn-secondary" id="resetBtn" type="button">Нулирай</button>
+      <div>
+        <label for="paidEur">Платено в €</label>
+        <input id="paidEur" type="text" placeholder="напр. 10,00">
       </div>
 
-      <div id="msg"></div>
-
-      <div class="out" id="out">
-        <h2>Резултат</h2>
-        <div class="row"><div>Сметка</div><div id="oPrice"></div></div>
-        <div class="row"><div>Платено общо</div><div id="oPaid"></div></div>
-        <div class="row"><div>Ресто (в €)</div><div id="oChange"></div></div>
-        <div id="bothBlock" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="tiny">
-        Може да пишете <b>12,30</b> или <b>12.30</b>. Калкулаторът приема и двете.
+      <div>
+        <label for="paidBgn">Платено в лв</label>
+        <input id="paidBgn" type="text" placeholder="напр. 20,00">
       </div>
     </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="calcBtn">Изчисли</button>
+      <button class="btn-secondary" id="resetBtn">Нулирай</button>
+    </div>
+
+    <div id="msg"></div>
+
+    <div class="out" id="out">
+      <h2>Резултат</h2>
+      <div class="row"><div>Сметка</div><div id="oPrice"></div></div>
+      <div class="row"><div>Платено общо</div><div id="oPaid"></div></div>
+      <div class="row"><div>Ресто (в €)</div><div id="oChange"></div></div>
+      <div id="bothBlock" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="tiny">
+      Може да пишете <b>запетая</b> или <b>точка</b>. Форматирането става автоматично.
+    </div>
   </div>
+</div>
 
 <script>
-  const RATE = 1.95583; // 1 EUR = 1.95583 BGN
-  const $ = (id) => document.getElementById(id);
+/* ================= НАСТРОЙКА ================= */
+const RATE = 1.95583;
+const DECIMAL = ","; // ← смени на "." ако искаш точка
+/* ============================================ */
 
-  // Accepts: "12,30", "12.30", " 1 234,56 ", "1.234,56" (BG style), "1,234.56" (EN style)
-  // Strategy:
-  //  - keep digits, '.' and ',' only
-  //  - if both separators appear, last one is decimal separator, the others are thousands separators
-  //  - if only one appears, treat it as decimal separator
-  function parseMoney(raw){
-    if (raw == null) return 0;
-    let s = String(raw).trim();
-    if (!s) return 0;
+const $ = (id) => document.getElementById(id);
 
-    // remove spaces and non-breaking spaces
-    s = s.replace(/\s|\u00A0/g, "");
+/* приема и , и . и маха интервали */
+function parseMoney(raw){
+  if (!raw) return 0;
+  let s = String(raw).trim().replace(/\s|\u00A0/g,"");
+  s = s.replace(/[^\d,.\-]/g,"");
 
-    // keep only digits, dot, comma, minus
-    s = s.replace(/[^\d,.\-]/g, "");
-    if (!s || s === "-" ) return 0;
-
-    const lastComma = s.lastIndexOf(",");
-    const lastDot = s.lastIndexOf(".");
-
-    // If both exist, last separator is decimal separator.
-    if (lastComma !== -1 && lastDot !== -1){
-      const decPos = Math.max(lastComma, lastDot);
-      const decChar = s[decPos];
-
-      // remove all separators first
-      let digits = s.replace(/[.,]/g, "");
-      // insert decimal point before the last N digits that were after the decimal separator
-      const decimalsCount = s.length - decPos - 1;
-
-      if (decimalsCount > 0){
-        const intPart = digits.slice(0, digits.length - decimalsCount) || "0";
-        const fracPart = digits.slice(digits.length - decimalsCount);
-        s = intPart + "." + fracPart;
-      } else {
-        s = digits; // no decimals
-      }
-    } else if (lastComma !== -1){
-      // only comma -> decimal
-      s = s.replace(/\./g, ""); // dots as thousands
-      s = s.replace(",", ".");
-    } else if (lastDot !== -1){
-      // only dot -> decimal
-      s = s.replace(/,/g, ""); // commas as thousands
-      // keep dot
+  const lc = s.lastIndexOf(",");
+  const ld = s.lastIndexOf(".");
+  if (lc !== -1 && ld !== -1){
+    const p = Math.max(lc, ld);
+    const dec = s.length - p - 1;
+    s = s.replace(/[.,]/g,"");
+    if (dec > 0){
+      s = s.slice(0, s.length-dec) + "." + s.slice(s.length-dec);
     }
-
-    const n = Number(s);
-    return Number.isFinite(n) ? n : 0;
+  } else if (lc !== -1){
+    s = s.replace(/\./g,"").replace(",",".");
+  } else if (ld !== -1){
+    s = s.replace(/,/g,"");
   }
 
-  function round2(x){
-    return Math.round((x + Number.EPSILON) * 100) / 100;
-  }
-  function fmt(x, cur){
-    const s = cur === "EUR" ? "€" : "лв";
-    return `${x.toFixed(2)} ${s}`;
-  }
-  function bgnToEur(bgn){ return bgn / RATE; }
-  function eurToBgn(eur){ return eur * RATE; }
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
 
-  function calc(){
-    const showBoth = $("showBoth").value === "yes";
+function round2(x){
+  return Math.round((x + Number.EPSILON) * 100) / 100;
+}
 
-    const priceEur = parseMoney($("priceEur").value);
-    const paidEur  = parseMoney($("paidEur").value);
-    const paidBgn  = parseMoney($("paidBgn").value);
+function formatInput(val){
+  const n = parseMoney(val);
+  if (!Number.isFinite(n)) return "";
+  let [i,f] = n.toFixed(2).split(".");
+  i = i.replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  return DECIMAL === "," ? `${i},${f}` : `${i}.${f}`;
+}
 
-    $("msg").innerHTML = "";
-    $("out").style.display = "none";
-    $("bothBlock").innerHTML = "";
+function eurToBgn(e){ return e * RATE; }
+function bgnToEur(b){ return b / RATE; }
 
-    if (!(priceEur > 0)){
-      $("msg").innerHTML = `<div class="warn">Въведи сума на сметката (в евро).</div>`;
-      return;
-    }
+function fmt(n, cur){
+  return `${n.toFixed(2)} ${cur === "EUR" ? "€" : "лв"}`;
+}
 
-    const totalPaidEur = paidEur + bgnToEur(paidBgn);
-    const diffEur = totalPaidEur - priceEur;
+function calc(){
+  const priceEur = parseMoney($("priceEur").value);
+  const paidEur  = parseMoney($("paidEur").value);
+  const paidBgn  = parseMoney($("paidBgn").value);
+  const showBoth = $("showBoth").value === "yes";
 
-    if (diffEur < -1e-9){
-      const shortEur = round2(-diffEur);
-      const shortBgn = round2(eurToBgn(shortEur));
-      $("msg").innerHTML = `<div class="warn">Недостатъчно платено. Не достигат: <b>${fmt(shortEur,"EUR")}</b>${showBoth ? ` (≈ <b>${fmt(shortBgn,"BGN")}</b>)` : ``}</div>`;
-    } else {
-      $("msg").innerHTML = `<div class="ok">Плащането е достатъчно.</div>`;
-    }
+  $("msg").innerHTML = "";
+  $("out").style.display = "none";
+  $("bothBlock").innerHTML = "";
 
-    const changeEur = round2(Math.max(diffEur, 0));
-
-    $("oPrice").textContent = fmt(round2(priceEur), "EUR");
-    $("oPaid").textContent  = fmt(round2(totalPaidEur), "EUR");
-    $("oChange").textContent = fmt(changeEur, "EUR");
-
-    if (showBoth){
-      const priceBgnEq  = round2(eurToBgn(priceEur));
-      const paidBgnEq   = round2(eurToBgn(totalPaidEur));
-      const changeBgnEq = round2(eurToBgn(Math.max(diffEur, 0)));
-
-      $("bothBlock").innerHTML = `
-        <div class="row"><div>Сметка (еквивалент)</div><div>${fmt(priceBgnEq,"BGN")}</div></div>
-        <div class="row"><div>Платено (еквивалент)</div><div>${fmt(paidBgnEq,"BGN")}</div></div>
-        <div class="row"><div>Ресто (еквивалент)</div><div>${fmt(changeBgnEq,"BGN")}</div></div>
-        <div class="row"><div>Разбивка платено</div><div>${fmt(round2(paidEur),"EUR")} + ${fmt(round2(paidBgn),"BGN")}</div></div>
-      `;
-    }
-
-    $("out").style.display = "block";
+  if (priceEur <= 0){
+    $("msg").innerHTML = `<div class="warn">Въведи сума на сметката.</div>`;
+    return;
   }
 
-  function resetAll(){
-    $("priceEur").value = "";
-    $("paidEur").value = "";
-    $("paidBgn").value = "";
-    $("showBoth").value = "yes";
-    $("msg").innerHTML = "";
-    $("out").style.display = "none";
+  const totalPaidEur = paidEur + bgnToEur(paidBgn);
+  const diff = totalPaidEur - priceEur;
+
+  if (diff < -1e-9){
+    $("msg").innerHTML =
+      `<div class="warn">Не достигат ${fmt(round2(-diff),"EUR")}</div>`;
+  } else {
+    $("msg").innerHTML = `<div class="ok">Плащането е достатъчно</div>`;
   }
 
-  $("calcBtn").addEventListener("click", calc);
-  $("resetBtn").addEventListener("click", resetAll);
+  $("oPrice").textContent  = fmt(round2(priceEur),"EUR");
+  $("oPaid").textContent   = fmt(round2(totalPaidEur),"EUR");
+  $("oChange").textContent = fmt(round2(Math.max(diff,0)),"EUR");
 
-  // Enter key = calculate
-  ["priceEur","paidEur","paidBgn"].forEach(id => {
-    $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") calc(); });
+  if (showBoth){
+    $("bothBlock").innerHTML = `
+      <div class="row"><div>Сметка (лв)</div><div>${fmt(round2(eurToBgn(priceEur)),"BGN")}</div></div>
+      <div class="row"><div>Платено (лв)</div><div>${fmt(round2(eurToBgn(totalPaidEur)),"BGN")}</div></div>
+      <div class="row"><div>Ресто (лв)</div><div>${fmt(round2(eurToBgn(Math.max(diff,0))),"BGN")}</div></div>
+      <div class="row"><div>Разбивка</div><div>${fmt(round2(paidEur),"EUR")} + ${fmt(round2(paidBgn),"BGN")}</div></div>
+    `;
+  }
+
+  $("out").style.display = "block";
+}
+
+function resetAll(){
+  ["priceEur","paidEur","paidBgn"].forEach(id => $(id).value="");
+  $("msg").innerHTML = "";
+  $("out").style.display = "none";
+}
+
+["priceEur","paidEur","paidBgn"].forEach(id => {
+  const el = $(id);
+  el.addEventListener("blur", () => {
+    if (el.value.trim()) el.value = formatInput(el.value);
   });
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter") calc();
+  });
+});
+
+$("calcBtn").addEventListener("click", calc);
+$("resetBtn").addEventListener("click", resetAll);
 </script>
 </body>
 </html>
